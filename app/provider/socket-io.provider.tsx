@@ -17,7 +17,7 @@ export const SocketIoProvider: React.FC<ISocketIoProviderProps> = ({
 
   React.useEffect(() => {
     if (!!socket) return;
-    const newSocket = io("http://127.0.0.1:3000", {
+    const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_SERVER_URL, {
       transports: ["websocket"],
       upgrade: false,
     });
