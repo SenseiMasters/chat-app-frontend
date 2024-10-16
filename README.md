@@ -6,7 +6,7 @@ We used Figma as product design tool.
 We used Trello as project management tool.
 [Click here to access it](https://trello.com/b/1J7UkTGr/chat-app-sensei-masters).
 
-## Initialization
+## Project setup
 
 Copy ".example.env" file to ".env.local" </br>
 Then install dependencies:
