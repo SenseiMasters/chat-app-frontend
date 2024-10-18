@@ -4,13 +4,17 @@ import * as React from "react";
 
 import { StandardButton } from "./button";
 import { SocketIoContext } from "../provider/socket-io.provider";
+import { RecorderContext } from "../provider/recorder-provider";
 
 export const VoiceRecorder: React.FC = () => {
   const { socket } = React.useContext(SocketIoContext);
+  const settings = React.useContext(RecorderContext);
+
   const [isRecording, setIsRecording] = React.useState<boolean>(false);
+
+  const record = React.useRef<boolean>(false);
   const audioBlob = React.useRef<BlobPart[]>([]);
   const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
-  const record = React.useRef<boolean>(false);
 
   const sendVoiceToServer = (blob: Blob) => {
     if (!socket) return;
@@ -25,18 +29,20 @@ export const VoiceRecorder: React.FC = () => {
 
   const resetMediaRecorder = () => {
     if (!mediaRecorderRef.current) return;
-    const timeout = Number(process.env.REFRESH_MEDIA_RECORDER_TIMEOUT || 1000);
     mediaRecorderRef.current.start();
     setTimeout(() => {
       if (!mediaRecorderRef.current) return;
       mediaRecorderRef.current.stop();
-    }, timeout);
+    }, settings.quantizationTime);
   };
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
+        audio: {
+          echoCancellation: settings.echoCancellation,
+          noiseSuppression: settings.noiseSuppression,
+        },
         video: false,
       });
       mediaRecorderRef.current = new MediaRecorder(stream);
