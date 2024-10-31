@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 
-import { SocketIoProvider } from "./provider/socket-io.provider";
+import { SocketIoProvider } from "../providers/socket-io.provider";
 
 import "./globals.css";
 

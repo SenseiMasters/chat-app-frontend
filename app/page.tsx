@@ -1,7 +1,7 @@
-import { VoicePlayer } from "./components/voice-player";
-import { VoiceRecorder } from "./components/voice-recoreder";
-import { VoiceSettings } from "./components/voice-settings";
-import { RecorderProvider } from "./provider/recorder-provider";
+import { VoicePlayer } from "@/components/voice-player";
+import { VoiceSettings } from "@/components/voice-settings";
+import { VoiceRecorder } from "@/components/voice-recoreder";
+import { RecorderProvider } from "../providers/recorder-provider";
 
 export default function Home() {
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import { DetailedHTMLProps, ButtonHTMLAttributes } from "react";
-import { classNames } from "../utils/tools/classNames";
+import { classNames } from "@/utils/tools/classNames";
 
 interface IStandardButton
   extends DetailedHTMLProps<

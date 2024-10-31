@@ -9,7 +9,7 @@ import { StandardInput } from "./input";
 import { StandardButton } from "./button";
 import { DialogHead } from "./dialog-head";
 import { SwitchWithinLabel } from "./switch";
-import { RecorderContext } from "../provider/recorder-provider";
+import { RecorderContext } from "../providers/recorder-provider";
 import {
   voiceSettingsFormSchema,
   voiceSettingsFormSchemaType,

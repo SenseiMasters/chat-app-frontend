@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import { StandardButton } from "./button";
-import { SocketIoContext } from "../provider/socket-io.provider";
+import { SocketIoContext } from "@/providers/socket-io.provider";
 
 export const VoicePlayer: React.FC = () => {
   const { socket } = React.useContext(SocketIoContext);
@@ -20,10 +20,19 @@ export const VoicePlayer: React.FC = () => {
   React.useEffect(() => {
     if (!socket) return;
 
-    socket.on("audioStream", (audioData: string) => {
+    socket.on("audioStream", (arrayBuffer: string) => {
       if (!listen.current) return;
-      const newData = audioData.split(";");
-      const audio = new Audio(`data:audio/ogg;${newData[1]}`);
+      const blob = new Blob([arrayBuffer], { type: "audio/wav" });
+      const url = window.URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      if (!audio || document.hidden) return;
+      audio.play();
+    });
+    socket.on("audioStreamGap", (arrayBuffer: string) => {
+      if (!listen.current) return;
+      const blob = new Blob([arrayBuffer], { type: "audio/wav" });
+      const url = window.URL.createObjectURL(blob);
+      const audio = new Audio(url);
       if (!audio || document.hidden) return;
       audio.play();
     });

@@ -1,5 +1,5 @@
 import React from "react";
-import { classNames } from "../utils/tools/classNames";
+import { classNames } from "@/utils/tools/classNames";
 
 interface IStandardInputProps
   extends React.DetailedHTMLProps<

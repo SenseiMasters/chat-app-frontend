@@ -3,8 +3,8 @@
 import * as React from "react";
 
 import { StandardButton } from "./button";
-import { SocketIoContext } from "../provider/socket-io.provider";
-import { RecorderContext } from "../provider/recorder-provider";
+import { SocketIoContext } from "@/providers/socket-io.provider";
+import { RecorderContext } from "@/providers/recorder-provider";
 
 export const VoiceRecorder: React.FC = () => {
   const { socket } = React.useContext(SocketIoContext);
@@ -14,26 +14,32 @@ export const VoiceRecorder: React.FC = () => {
 
   const record = React.useRef<boolean>(false);
   const audioBlob = React.useRef<BlobPart[]>([]);
+  const gapAudioBlob = React.useRef<BlobPart[]>([]);
   const mediaRecorderRef = React.useRef<MediaRecorder | null>(null);
+  const gapMediaRecorderRef = React.useRef<MediaRecorder | null>(null);
 
   const sendVoiceToServer = (blob: Blob) => {
     if (!socket) return;
-    const fileReader = new FileReader();
-    fileReader.readAsDataURL(blob);
-    fileReader.onloadend = function () {
-      const base64String = fileReader.result as string;
-      socket.emit("audioStream", base64String);
-      audioBlob.current = [];
-    };
+    socket.emit("audioStream", blob);
+    audioBlob.current = [];
   };
 
   const resetMediaRecorder = () => {
-    if (!mediaRecorderRef.current) return;
-    mediaRecorderRef.current.start();
+    mediaRecorderRef.current?.start();
+    console.log("* start");
+    
     setTimeout(() => {
-      if (!mediaRecorderRef.current) return;
-      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current?.stop();
+      console.log("* end");
     }, settings.quantizationTime);
+    setTimeout(() => {
+      gapMediaRecorderRef.current?.start();
+      console.log("- start");
+    }, settings.quantizationTime - 500);
+    setTimeout(() => {
+      gapMediaRecorderRef.current?.stop();
+      console.log("- end");
+    }, settings.quantizationTime + 500);
   };
 
   const startRecording = async () => {
@@ -42,22 +48,42 @@ export const VoiceRecorder: React.FC = () => {
         audio: {
           echoCancellation: settings.echoCancellation,
           noiseSuppression: settings.noiseSuppression,
+          frameRate: { ideal: 15, max: 15 },
         },
         video: false,
       });
-      mediaRecorderRef.current = new MediaRecorder(stream);
+      mediaRecorderRef.current = new MediaRecorder(stream, {
+        audioBitsPerSecond: 10000,
+        mimeType: "audio/webm;codecs=opus",
+      });
+      gapMediaRecorderRef.current = new MediaRecorder(stream, {
+        audioBitsPerSecond: 10000,
+        mimeType: "audio/webm;codecs=opus",
+      });
 
       mediaRecorderRef.current.ondataavailable = async (event) => {
         if (!record.current) return;
         if (event.data.size <= 0 || !socket) return;
         audioBlob.current.push(event.data);
       };
+      gapMediaRecorderRef.current.ondataavailable = async (event) => {
+        if (!record.current) return;
+        if (event.data.size <= 0 || !socket) return;
+        gapAudioBlob.current.push(event.data);
+      };
 
       mediaRecorderRef.current.addEventListener("stop", async () => {
         if (!record.current) return;
         if (!socket || !mediaRecorderRef.current) return;
-        sendVoiceToServer(new Blob(audioBlob.current));
+        socket.emit("audioStream", new Blob(audioBlob.current));
+        audioBlob.current = [];
         resetMediaRecorder();
+      });
+      gapMediaRecorderRef.current.addEventListener("stop", async () => {
+        if (!record.current) return;
+        if (!socket || !gapMediaRecorderRef.current) return;
+        socket.emit("audioStreamGap", new Blob(gapAudioBlob.current));
+        gapAudioBlob.current = [];
       });
 
       resetMediaRecorder();

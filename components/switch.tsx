@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Switch } from "@headlessui/react";
-import { classNames } from "../utils/tools/classNames";
+import { classNames } from "@/utils/tools/classNames";
 
 interface ISwitchButtonProps {
   name?: string;
